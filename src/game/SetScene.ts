@@ -14,9 +14,11 @@ export default class SetScene extends Phaser.Scene {
   private npcGroup!: Phaser.Physics.Arcade.StaticGroup;
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
   private dialog!: DialogBox;
-  private promptText!: Phaser.GameObjects.Text;
+  private promptButton!: Phaser.GameObjects.Container;
+  private promptLabel!: Phaser.GameObjects.Text;
   private controlsHint!: Phaser.GameObjects.Text;
   private nearbyProfile: NpcProfile | null = null;
+  private touchActive = false;
 
   constructor() {
     super("set-scene");
@@ -109,17 +111,22 @@ export default class SetScene extends Phaser.Scene {
 
     this.dialog = new DialogBox(this);
 
-    this.promptText = this.add
-      .text(0, 0, "Press Space to talk", {
-        fontSize: "14px",
-        color: "#ffffff",
-        backgroundColor: "rgba(15, 18, 32, 0.85)",
-      })
-      .setPadding(8, 6)
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(9)
-      .setVisible(false);
+    const promptBg = this.add
+      .rectangle(0, 0, 220, 44, 0x111827, 0.95)
+      .setStrokeStyle(2, 0x22c55e, 0.9)
+      .setOrigin(0.5);
+
+    this.promptLabel = this.add.text(0, 0, "TALK", {
+      fontSize: "16px",
+      color: "#ffffff",
+      fontStyle: "600",
+    });
+    this.promptLabel.setOrigin(0.5);
+
+    this.promptButton = this.add.container(0, 0, [promptBg, this.promptLabel]);
+    this.promptButton.setScrollFactor(0);
+    this.promptButton.setDepth(9);
+    this.promptButton.setVisible(false);
 
     this.controlsHint = this.add
       .text(0, 0, "Use Arrow Keys to move • Press Space to talk", {
@@ -148,6 +155,14 @@ export default class SetScene extends Phaser.Scene {
 
     this.positionPrompt(this.scale.width, this.scale.height);
     this.controlsHint.setPosition(this.scale.width / 2, this.scale.height / 2);
+
+    this.input.on("pointerdown", () => {
+      this.touchActive = true;
+    });
+
+    this.input.on("pointerup", () => {
+      this.touchActive = false;
+    });
   }
 
   update(): void {
@@ -169,26 +184,44 @@ export default class SetScene extends Phaser.Scene {
     }
 
     if (this.nearbyProfile) {
-      this.promptText.setVisible(true);
+      this.promptButton.setVisible(true);
       if (talkPressed) {
         this.dialog.show(this.nearbyProfile);
       }
     } else {
-      this.promptText.setVisible(false);
+      this.promptButton.setVisible(false);
     }
 
-    const vx = this.getAxis(
+    let vx = this.getAxis(
       this.keys.A,
       this.keys.D,
       this.cursors.left,
       this.cursors.right,
     );
-    const vy = this.getAxis(
+    let vy = this.getAxis(
       this.keys.W,
       this.keys.S,
       this.cursors.up,
       this.cursors.down,
     );
+
+    if (this.touchActive) {
+      const pointer = this.input.activePointer;
+      const worldPoint = pointer.positionToCamera(
+        this.cameras.main,
+      ) as Phaser.Math.Vector2;
+      const dx = worldPoint.x - this.player.x;
+      const dy = worldPoint.y - this.player.y;
+      const distanceSq = dx * dx + dy * dy;
+      if (distanceSq > 25) {
+        const len = Math.sqrt(distanceSq);
+        vx = dx / len;
+        vy = dy / len;
+      } else {
+        vx = 0;
+        vy = 0;
+      }
+    }
 
     const velocity = new Phaser.Math.Vector2(vx, vy)
       .normalize()
@@ -312,6 +345,6 @@ export default class SetScene extends Phaser.Scene {
   }
 
   private positionPrompt(width: number, height: number): void {
-    this.promptText.setPosition(width / 2, height - 210);
+    this.promptButton.setPosition(width / 2, height - 70);
   }
 }
