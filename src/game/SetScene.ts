@@ -127,6 +127,23 @@ export default class SetScene extends Phaser.Scene {
     this.promptButton.setScrollFactor(0);
     this.promptButton.setDepth(9);
     this.promptButton.setVisible(false);
+    this.promptButton.setSize(220, 44);
+    promptBg.setInteractive();
+    promptBg.on(
+      "pointerdown",
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData,
+      ) => {
+        event.stopPropagation();
+        if (this.nearbyProfile && !this.dialog.visible) {
+          this.dialog.show(this.nearbyProfile);
+          this.promptButton.setVisible(false);
+        }
+      },
+    );
 
     this.controlsHint = this.add
       .text(0, 0, "Use Arrow Keys to move • Press Space to talk", {
@@ -156,12 +173,26 @@ export default class SetScene extends Phaser.Scene {
     this.positionPrompt(this.scale.width, this.scale.height);
     this.controlsHint.setPosition(this.scale.width / 2, this.scale.height / 2);
 
-    this.input.on("pointerdown", () => {
+    this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      if (this.isPointerOverPrompt(pointer)) {
+        this.touchActive = false;
+        return;
+      }
       this.touchActive = true;
     });
 
     this.input.on("pointerup", () => {
       this.touchActive = false;
+    });
+
+    this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      if (
+        this.dialog.visible &&
+        !this.dialog.getBounds().contains(pointer.worldX, pointer.worldY) &&
+        !this.isPointerOverPrompt(pointer)
+      ) {
+        this.dialog.hide();
+      }
     });
   }
 
@@ -177,6 +208,7 @@ export default class SetScene extends Phaser.Scene {
 
     if (this.dialog.visible) {
       this.player.setVelocity(0);
+      this.promptButton.setVisible(false);
       if (talkPressed) {
         this.dialog.hide();
       }
@@ -346,5 +378,12 @@ export default class SetScene extends Phaser.Scene {
 
   private positionPrompt(width: number, height: number): void {
     this.promptButton.setPosition(width / 2, height - 70);
+  }
+
+  private isPointerOverPrompt(pointer: Phaser.Input.Pointer): boolean {
+    if (!this.promptButton.visible) {
+      return false;
+    }
+    return this.promptButton.getBounds().contains(pointer.x, pointer.y);
   }
 }

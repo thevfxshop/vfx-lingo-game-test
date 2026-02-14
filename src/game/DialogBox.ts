@@ -67,7 +67,7 @@ export default class DialogBox extends Phaser.GameObjects.Container {
     this.hintText = scene.add.text(
       this.boxWidth / 2 - 16,
       this.boxHeight / 2 - 18,
-      "E / Space to close",
+      "Space to close",
       {
         fontSize: "12px",
         color: "#94a3b8",
