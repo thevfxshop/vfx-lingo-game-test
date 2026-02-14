@@ -115,7 +115,8 @@ export default class SetScene extends Phaser.Scene {
     const promptBg = this.add
       .rectangle(0, 0, 220, 44, 0x111827, 0.95)
       .setStrokeStyle(2, 0x22c55e, 0.9)
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setScrollFactor(0);
 
     const talkLabel = this.sys.game.device.os.desktop
       ? "Press Space to talk"
@@ -125,7 +126,7 @@ export default class SetScene extends Phaser.Scene {
       color: "#ffffff",
       fontStyle: "600",
     });
-    this.promptLabel.setOrigin(0.5);
+    this.promptLabel.setOrigin(0.5).setScrollFactor(0);
 
     this.promptButton = this.add.container(0, 0, [promptBg, this.promptLabel]);
     this.promptButton.setScrollFactor(0);
@@ -172,8 +173,10 @@ export default class SetScene extends Phaser.Scene {
     });
 
     this.scale.on("resize", (gameSize: Phaser.Structs.Size) => {
+      this.cameras.main.setSize(gameSize.width, gameSize.height);
       this.dialog.reposition(gameSize.width, gameSize.height);
       this.positionPrompt(gameSize.width, gameSize.height);
+      this.controlsHint.setPosition(gameSize.width / 2, gameSize.height / 2);
     });
 
     this.positionPrompt(this.scale.width, this.scale.height);
@@ -195,7 +198,7 @@ export default class SetScene extends Phaser.Scene {
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       if (
         this.dialog.visible &&
-        !this.dialog.getBounds().contains(pointer.worldX, pointer.worldY) &&
+        !this.dialog.getBounds().contains(pointer.x, pointer.y) &&
         !this.isPointerOverPrompt(pointer)
       ) {
         this.dialog.hide();
