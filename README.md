@@ -18,7 +18,7 @@ Setup
 Controls
 
 - Move: WASD or Arrow keys
-- Talk: E or Space when near an NPC
+- Talk: Space when near an NPC
 
 Notes
 

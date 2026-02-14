@@ -116,7 +116,10 @@ export default class SetScene extends Phaser.Scene {
       .setStrokeStyle(2, 0x22c55e, 0.9)
       .setOrigin(0.5);
 
-    this.promptLabel = this.add.text(0, 0, "TALK", {
+    const talkLabel = this.sys.game.device.os.desktop
+      ? "Press Space to talk"
+      : "Talk";
+    this.promptLabel = this.add.text(0, 0, talkLabel, {
       fontSize: "16px",
       color: "#ffffff",
       fontStyle: "600",
