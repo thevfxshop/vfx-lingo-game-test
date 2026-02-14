@@ -5,7 +5,7 @@ import { npcProfiles, type NpcProfile } from "./data/npcs";
 const WORLD_WIDTH = 1500;
 const WORLD_HEIGHT = 1000;
 const PLAYER_SPEED = 150;
-const DEBUG_COLLISION = true;
+const DEBUG_COLLISION = false;
 
 export default class SetScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
@@ -15,6 +15,7 @@ export default class SetScene extends Phaser.Scene {
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
   private dialog!: DialogBox;
   private promptText!: Phaser.GameObjects.Text;
+  private controlsHint!: Phaser.GameObjects.Text;
   private nearbyProfile: NpcProfile | null = null;
 
   constructor() {
@@ -109,7 +110,7 @@ export default class SetScene extends Phaser.Scene {
     this.dialog = new DialogBox(this);
 
     this.promptText = this.add
-      .text(0, 0, "Press E to talk", {
+      .text(0, 0, "Press Space to talk", {
         fontSize: "14px",
         color: "#ffffff",
         backgroundColor: "rgba(15, 18, 32, 0.85)",
@@ -120,12 +121,33 @@ export default class SetScene extends Phaser.Scene {
       .setDepth(9)
       .setVisible(false);
 
+    this.controlsHint = this.add
+      .text(0, 0, "Use Arrow Keys to move • Press Space to talk", {
+        fontSize: "14px",
+        color: "#ffffff",
+        backgroundColor: "rgba(15, 18, 32, 0.9)",
+      })
+      .setPadding(10, 8)
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(9);
+
+    this.tweens.add({
+      targets: this.controlsHint,
+      alpha: 0,
+      ease: "Sine.easeInOut",
+      duration: 2000,
+      delay: 2600,
+      onComplete: () => this.controlsHint.setVisible(false),
+    });
+
     this.scale.on("resize", (gameSize: Phaser.Structs.Size) => {
       this.dialog.reposition(gameSize.width, gameSize.height);
       this.positionPrompt(gameSize.width, gameSize.height);
     });
 
     this.positionPrompt(this.scale.width, this.scale.height);
+    this.controlsHint.setPosition(this.scale.width / 2, this.scale.height / 2);
   }
 
   update(): void {
