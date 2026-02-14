@@ -16,7 +16,6 @@ export default class SetScene extends Phaser.Scene {
   private dialog!: DialogBox;
   private promptText!: Phaser.GameObjects.Text;
   private nearbyProfile: NpcProfile | null = null;
-  private walkFrames: string[] = [];
 
   constructor() {
     super("set-scene");
