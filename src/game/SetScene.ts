@@ -52,7 +52,6 @@ export default class SetScene extends Phaser.Scene {
     this.createTexture("collision-pixel", 2, 2, 0xffffff);
     this.buildCollisionFromImage("filmset-collision", 32);
 
-    this.walkFrames = Array.from({ length: 29 }, (_, index) => `${index}`);
     this.anims.create({
       key: "player-walk",
       frames: this.anims.generateFrameNumbers("player-sheet", {
