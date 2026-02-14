@@ -26,6 +26,9 @@ export default class SetScene extends Phaser.Scene {
   }
 
   create(): void {
+    if (!this.sys.game.device.os.desktop) {
+      this.scale.scaleMode = Phaser.Scale.RESIZE;
+    }
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.keys = this.input.keyboard!.addKeys("W,A,S,D,E,SPACE") as {
       [key: string]: Phaser.Input.Keyboard.Key;
