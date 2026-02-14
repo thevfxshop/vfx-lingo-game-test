@@ -19,6 +19,7 @@ export default class SetScene extends Phaser.Scene {
   private controlsHint!: Phaser.GameObjects.Text;
   private nearbyProfile: NpcProfile | null = null;
   private touchActive = false;
+  private suppressTouch = false;
 
   constructor() {
     super("set-scene");
@@ -141,6 +142,8 @@ export default class SetScene extends Phaser.Scene {
         event: Phaser.Types.Input.EventData,
       ) => {
         event.stopPropagation();
+        this.suppressTouch = true;
+        this.touchActive = false;
         if (this.nearbyProfile && !this.dialog.visible) {
           this.dialog.show(this.nearbyProfile);
           this.promptButton.setVisible(false);
@@ -177,7 +180,7 @@ export default class SetScene extends Phaser.Scene {
     this.controlsHint.setPosition(this.scale.width / 2, this.scale.height / 2);
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-      if (this.isPointerOverPrompt(pointer)) {
+      if (this.suppressTouch || this.isPointerOverPrompt(pointer)) {
         this.touchActive = false;
         return;
       }
@@ -186,6 +189,7 @@ export default class SetScene extends Phaser.Scene {
 
     this.input.on("pointerup", () => {
       this.touchActive = false;
+      this.suppressTouch = false;
     });
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
